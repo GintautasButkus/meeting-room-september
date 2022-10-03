@@ -7,8 +7,17 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.lang.reflect.Type;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 
 import org.springframework.stereotype.Service;
 
@@ -19,6 +28,8 @@ import com.google.gson.reflect.TypeToken;
 import lt.butkus.exceptions.AttendeeAlreadyParticipateThisMeetingException;
 import lt.butkus.exceptions.ResponsiblePersonCannotBeRemovedException;
 import lt.butkus.model.Attendee;
+import lt.butkus.model.EnumCategory;
+import lt.butkus.model.EnumType;
 import lt.butkus.model.Meeting;
 
 @Service
@@ -46,13 +57,12 @@ public class MeetingService {
 	public Meeting[] getMeetings() {
 		Gson gson1 = new Gson();
 		try (Reader reader = new FileReader("C:\\Users\\ginta\\Downloads\\meetup.json")) {
-			Meeting[] meetings = gson1.fromJson(reader, Meeting[].class);
-			return meetings;
+			return gson1.fromJson(reader, Meeting[].class);
 
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return null;
+		return new Meeting[0];
 	}
 
 	public void deleteMeeting(String id) throws IOException {
@@ -127,5 +137,19 @@ public class MeetingService {
 		for (Meeting meeting : meetingsList) {
 			saveMeeting(meeting);
 		}
+	}
+	
+	public List<Meeting> filterMeeting(String description, String responsiblePerson, EnumCategory category, EnumType type, String startDate, String endDate, Integer numberAttendees){
+		Stream<Meeting> stream = Arrays.stream(getMeetings());
+		
+		return stream
+			.filter(meeting -> description == null || meeting.getDescription().toLowerCase().contains(description.toLowerCase()))
+			.filter(meeting -> responsiblePerson == null || meeting.getResponsiblePerson().equals(responsiblePerson))
+			.filter(meeting -> category == null || meeting.getCategory().equals(category))
+			.filter(meeting -> type == null || meeting.getType().equals(type))
+			.filter(meeting -> startDate == null || LocalDateTime.parse(meeting.getStartDate()).isAfter(LocalDateTime.parse(startDate)) || LocalDateTime.parse(meeting.getStartDate()).isEqual(LocalDateTime.parse(startDate)))
+			.filter(meeting -> endDate == null || LocalDateTime.parse(meeting.getEndDate()).isBefore(LocalDateTime.parse(endDate)))
+			.filter(meeting -> numberAttendees == null || meeting.getAttendee().size() >= numberAttendees)
+		.collect(Collectors.toList());
 	}
 }
