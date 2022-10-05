@@ -7,10 +7,14 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.lang.reflect.Type;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -20,7 +24,6 @@ import org.springframework.stereotype.Service;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import java.util.logging.Logger;
 
 import lt.butkus.exceptions.AttendeeAlreadyParticipateThisMeetingException;
 import lt.butkus.exceptions.AttendeeMeetingOverlapsException;
@@ -155,8 +158,8 @@ public class MeetingService {
 	}
 	
 	private void saveNewFile(List<Meeting> newList) throws IOException {
-		File file = new File(filePath + fileName);
-		file.delete();
+		Path path = Paths.get(filePath + fileName);
+		Files.delete(path);
 		PrintWriter pw = new PrintWriter(new FileWriter(filePath + fileName));
 		pw.close();
 
