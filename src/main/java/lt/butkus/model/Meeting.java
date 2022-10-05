@@ -4,7 +4,10 @@ import java.util.List;
 
 import javax.persistence.Id;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import io.swagger.annotations.ApiModelProperty;
+import io.swagger.annotations.ApiParam;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,7 +27,9 @@ public class Meeting {
 	private String description;
 	private EnumCategory category;
 	private EnumType type;
+	@ApiModelProperty(value = "yyyy-MM-dd HH:mm:ss", example = "2022-10-03 22:05:06")
 	private String startDate;
+	@ApiModelProperty(value = "yyyy-MM-dd HH:mm:ss", example = "2022-10-03 22:05:06")
 	private String endDate;
 	@ApiModelProperty(hidden = true)
 	private List<Attendee> attendee;

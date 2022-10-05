@@ -8,17 +8,13 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.lang.reflect.Type;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.gson.Gson;
@@ -26,22 +22,34 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
 import lt.butkus.exceptions.AttendeeAlreadyParticipateThisMeetingException;
+import lt.butkus.exceptions.AttendeeMeetingOverlapsException;
 import lt.butkus.exceptions.ResponsiblePersonCannotBeRemovedException;
 import lt.butkus.model.Attendee;
 import lt.butkus.model.EnumCategory;
 import lt.butkus.model.EnumType;
 import lt.butkus.model.Meeting;
 
+
+
 @Service
 public class MeetingService {
+	
+	@Value("${my.app.myProp}")
+	private String filePath;
 
 	Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
 	public void saveMeeting(Meeting meeting) throws IOException {
-
+		File f = new File(filePath + "meeting_room.json");
+		if(!f.exists()){
+			PrintWriter pw = new PrintWriter(new FileWriter(filePath + "meeting_room.json"));
+		}else{
+		  System.out.println("File already exists and you can continue the work on old file.");
+		}
+		
 		Type dtoListType = new TypeToken<List<Meeting>>() {
 		}.getType();
-		FileReader fr = new FileReader("C:\\Users\\ginta\\Downloads\\meetup.json");
+		FileReader fr = new FileReader(filePath + "meeting_room.json");
 
 		List<Meeting> dtos = gson.fromJson(fr, dtoListType);
 		fr.close();
@@ -49,14 +57,14 @@ public class MeetingService {
 			dtos = new ArrayList<>();
 		}
 		dtos.add(meeting);
-		FileWriter fw = new FileWriter("C:\\Users\\ginta\\Downloads\\meetup.json");
+		FileWriter fw = new FileWriter(filePath + "meeting_room.json");
 		gson.toJson(dtos, fw);
 		fw.close();
 	}
 
 	public Meeting[] getMeetings() {
 		Gson gson1 = new Gson();
-		try (Reader reader = new FileReader("C:\\Users\\ginta\\Downloads\\meetup.json")) {
+		try (Reader reader = new FileReader(filePath + "meeting_room.json")) {
 			return gson1.fromJson(reader, Meeting[].class);
 
 		} catch (IOException e) {
@@ -74,24 +82,24 @@ public class MeetingService {
 					|| !meetings[i].getResponsiblePerson().equals(System.getProperty("user.name"))) {
 				meetingsList.add(meetings[i]);
 			}
-
-			File file = new File("C:\\Users\\ginta\\Downloads\\meetup.json");
-			file.delete();
-			PrintWriter pw = new PrintWriter(new FileWriter("C:\\Users\\ginta\\Downloads\\meetup.json"));
-
-			for (Meeting meeting : meetingsList) {
-				saveMeeting(meeting);
-			}
-
+			saveNewFile(meetingsList);
 		}
 	}
 
 	public void addAttendee(Attendee attendee, String meetingId) throws IOException {
 		List<Meeting> meetingsList = new ArrayList<>();
 		Meeting[] meetings = getMeetings();
-
+		List<Meeting> attendeeMeetings = (Arrays.stream(meetings).filter(m -> m.getAttendee().stream().anyMatch(a-> a.getName().equals(attendee.getName())))).collect(Collectors.toList());
+		
 		for (Meeting meeting : meetings) {
-			if (meeting.getId().equals(meetingId)
+			if(meeting.getId().equals(meetingId)
+					&& meeting.getAttendee().stream().noneMatch(a -> a.getName().equals(attendee.getName())) &&
+					!(attendeeMeetings.stream().filter(m->!LocalDateTime.parse(meeting.getStartDate()).isBefore(LocalDateTime.parse(m.getStartDate())) &&
+					LocalDateTime.parse(meeting.getStartDate()).isBefore(LocalDateTime.parse(m.getEndDate()))
+					|| (LocalDateTime.parse(meeting.getEndDate()).isAfter(LocalDateTime.parse(m.getStartDate())) &&
+					!LocalDateTime.parse(meeting.getEndDate()).isAfter(LocalDateTime.parse(m.getEndDate()))))).collect(Collectors.toList()).isEmpty()){
+						throw new AttendeeMeetingOverlapsException("Meeting intersacts with other atenddee's meetings.");
+			}else if (meeting.getId().equals(meetingId)
 					&& meeting.getAttendee().stream().noneMatch(a -> a.getName().equals(attendee.getName()))) {
 				meeting.getAttendee().add(attendee);
 				meetingsList.add(meeting);
@@ -104,13 +112,7 @@ public class MeetingService {
 				meetingsList.add(meeting);
 			}
 		}
-		File file = new File("C:\\Users\\ginta\\Downloads\\meetup.json");
-		file.delete();
-		PrintWriter pw = new PrintWriter(new FileWriter("C:\\Users\\ginta\\Downloads\\meetup.json"));
-
-		for (Meeting meeting : meetingsList) {
-			saveMeeting(meeting);
-		}
+		saveNewFile(meetingsList);
 	}
 
 	public void deleteAttendee(String name, String meetingId) throws IOException {
@@ -129,14 +131,7 @@ public class MeetingService {
 				meetingsList.add(meeting);
 			}
 		}
-
-		File file = new File("C:\\Users\\ginta\\Downloads\\meetup.json");
-		file.delete();
-		PrintWriter pw = new PrintWriter(new FileWriter("C:\\Users\\ginta\\Downloads\\meetup.json"));
-
-		for (Meeting meeting : meetingsList) {
-			saveMeeting(meeting);
-		}
+		saveNewFile(meetingsList);
 	}
 	
 	public List<Meeting> filterMeeting(String description, String responsiblePerson, EnumCategory category, EnumType type, String startDate, String endDate, Integer numberAttendees){
@@ -151,5 +146,16 @@ public class MeetingService {
 			.filter(meeting -> endDate == null || LocalDateTime.parse(meeting.getEndDate()).isBefore(LocalDateTime.parse(endDate)))
 			.filter(meeting -> numberAttendees == null || meeting.getAttendee().size() >= numberAttendees)
 		.collect(Collectors.toList());
+	}
+	
+	public void saveNewFile(List<Meeting> newList) throws IOException {
+		File file = new File(filePath + "meeting_room.json");
+		file.delete();
+		PrintWriter pw = new PrintWriter(new FileWriter(filePath + "meeting_room.json"));
+
+		for (Meeting meeting : newList) {
+			saveMeeting(meeting);
+		}
+		
 	}
 }
