@@ -1,9 +1,9 @@
-###### Meeting Room for September
+## Meeting Room for September
 
 >#### Create a web application to manage Visma’s internal meetings using Java Spring Boot.
 
-#### Requirements:
-## Rest API endpoint to create a new meeting. All the meeting data should be stored in a JSON file. Application should retain data between restarts. Meeting model should contain the following properties:
+## Requirements:
+#### Rest API endpoint to create a new meeting. All the meeting data should be stored in a JSON file. Application should retain data between restarts. Meeting model should contain the following properties:
 - Name
 - ResponsiblePerson
 - Description
@@ -12,17 +12,17 @@
 - StartDate
 - EndDate
 
-## Rest API endpoint to delete a meeting. Only the person responsible can delete the meeting.
+#### Rest API endpoint to delete a meeting. Only the person responsible can delete the meeting.
 
-## Rest API endpoint to add a person to the meeting.
+#### Rest API endpoint to add a person to the meeting.
 - Command should specify who is being added and at what time.
 - If a person is already in a meeting which intersects with the one being added, a warning message should be given.
 - Prevent the same person from being added twice.
 
-## Rest API endpoint to remove a person from the meeting.
+#### Rest API endpoint to remove a person from the meeting.
 - If a person is responsible for the meeting, he can not be removed.
 
-## Rest API endpoint to list all the meetings. Add the following parameters to filter the data:
+#### Rest API endpoint to list all the meetings. Add the following parameters to filter the data:
 - Filter by description (if the description is “Jono Java meetas”, searching for java should return this entry)
 - Filter by responsible person
 - Filter by category
