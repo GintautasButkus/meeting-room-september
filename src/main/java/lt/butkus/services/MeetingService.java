@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import java.util.logging.Logger;
 
 import lt.butkus.exceptions.AttendeeAlreadyParticipateThisMeetingException;
 import lt.butkus.exceptions.AttendeeMeetingOverlapsException;
@@ -34,22 +35,27 @@ import lt.butkus.model.Meeting;
 @Service
 public class MeetingService {
 	
+	private static Logger logger = Logger.getLogger("InfoLogging");
+	
 	@Value("${my.app.myProp}")
 	private String filePath;
+	
+	private String fileName = "meeting_room.json";
 
 	Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
 	public void saveMeeting(Meeting meeting) throws IOException {
-		File f = new File(filePath + "meeting_room.json");
+		File f = new File(filePath + fileName);
 		if(!f.exists()){
-			PrintWriter pw = new PrintWriter(new FileWriter(filePath + "meeting_room.json"));
+			PrintWriter pw = new PrintWriter(new FileWriter(filePath + fileName));
+			pw.close();
 		}else{
-		  System.out.println("File already exists and you can continue the work on old file.");
+			logger.info("The JSON file has been already created and working on previously created json file.");
 		}
 		
 		Type dtoListType = new TypeToken<List<Meeting>>() {
 		}.getType();
-		FileReader fr = new FileReader(filePath + "meeting_room.json");
+		FileReader fr = new FileReader(filePath + fileName);
 
 		List<Meeting> dtos = gson.fromJson(fr, dtoListType);
 		fr.close();
@@ -57,14 +63,14 @@ public class MeetingService {
 			dtos = new ArrayList<>();
 		}
 		dtos.add(meeting);
-		FileWriter fw = new FileWriter(filePath + "meeting_room.json");
+		FileWriter fw = new FileWriter(filePath + fileName);
 		gson.toJson(dtos, fw);
 		fw.close();
 	}
 
 	public Meeting[] getMeetings() {
 		Gson gson1 = new Gson();
-		try (Reader reader = new FileReader(filePath + "meeting_room.json")) {
+		try (Reader reader = new FileReader(filePath + fileName)) {
 			return gson1.fromJson(reader, Meeting[].class);
 
 		} catch (IOException e) {
@@ -148,10 +154,11 @@ public class MeetingService {
 		.collect(Collectors.toList());
 	}
 	
-	public void saveNewFile(List<Meeting> newList) throws IOException {
-		File file = new File(filePath + "meeting_room.json");
+	private void saveNewFile(List<Meeting> newList) throws IOException {
+		File file = new File(filePath + fileName);
 		file.delete();
-		PrintWriter pw = new PrintWriter(new FileWriter(filePath + "meeting_room.json"));
+		PrintWriter pw = new PrintWriter(new FileWriter(filePath + fileName));
+		pw.close();
 
 		for (Meeting meeting : newList) {
 			saveMeeting(meeting);
