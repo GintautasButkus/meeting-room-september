@@ -1,6 +1,11 @@
 ## Meeting Room for September
 
->#### Create a web application to manage Visma’s internal meetings using Java Spring Boot.
+>#### Create a web application to manage internal meetings using Java Spring Boot.
+
+## Instructions:
+- Before launching the application change/enter directory pathway in *application.properties* file where the json file will be created. Pathway example: *C:\\Users\\example\\Desktop\\*
+- Once done application can be start as a Spring Boot application. To manipulate the application itself Swagger UI can be accessed at http://localhost:8080/swagger-ui/.
+
 
 ## Requirements:
 #### Rest API endpoint to create a new meeting. All the meeting data should be stored in a JSON file. Application should retain data between restarts. Meeting model should contain the following properties:
