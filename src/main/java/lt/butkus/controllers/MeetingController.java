@@ -28,7 +28,6 @@ import lt.butkus.model.EnumType;
 import lt.butkus.model.Meeting;
 import lt.butkus.services.MeetingService;
 
-//@CrossOrigin(origins = "*", maxAge = 3600)
 @Api(value = "", tags = { "Meeting Manager" })
 @Tag(name = "Meeting Manager", description = "Meeting Schdule Manager")
 @RestController
@@ -93,8 +92,8 @@ public class MeetingController {
 			@RequestParam(required = false) String responsiblePerson, 
 			@RequestParam(required = false) EnumCategory category, 
 			@RequestParam(required = false) EnumType type, 
-			@RequestParam(required = false) String startDate, 
-			@RequestParam(required = false) String endDate, 
+			@RequestParam(required = false, defaultValue = "Example: yyyy-MM-ddThh:mm") String startDate, 
+			@RequestParam(required = false, defaultValue = "Example: yyyy-MM-ddThh:mm") String endDate, 
 			@RequestParam(required = false) Integer numberAttendees){
 		
 		return meetingService.filterMeeting(description, 

@@ -151,8 +151,8 @@ public class MeetingService {
 			.filter(meeting -> responsiblePerson == null || meeting.getResponsiblePerson().equals(responsiblePerson))
 			.filter(meeting -> category == null || meeting.getCategory().equals(category))
 			.filter(meeting -> type == null || meeting.getType().equals(type))
-			.filter(meeting -> startDate == null || LocalDateTime.parse(meeting.getStartDate()).isAfter(LocalDateTime.parse(startDate)) || LocalDateTime.parse(meeting.getStartDate()).isEqual(LocalDateTime.parse(startDate)))
-			.filter(meeting -> endDate == null || LocalDateTime.parse(meeting.getEndDate()).isBefore(LocalDateTime.parse(endDate)))
+			.filter(meeting -> startDate == null || !LocalDateTime.parse(meeting.getStartDate()).isBefore(LocalDateTime.parse(startDate))) 
+			.filter(meeting -> endDate == null || !LocalDateTime.parse(meeting.getEndDate()).isAfter(LocalDateTime.parse(endDate)))
 			.filter(meeting -> numberAttendees == null || meeting.getAttendee().size() >= numberAttendees)
 		.collect(Collectors.toList());
 	}
