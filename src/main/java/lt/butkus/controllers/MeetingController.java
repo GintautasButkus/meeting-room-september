@@ -1,5 +1,6 @@
 package lt.butkus.controllers;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -92,9 +93,9 @@ public class MeetingController {
 			@RequestParam(required = false) String responsiblePerson, 
 			@RequestParam(required = false) EnumCategory category, 
 			@RequestParam(required = false) EnumType type, 
-			@RequestParam(required = false, defaultValue = "Example: yyyy-MM-ddThh:mm") String startDate, 
-			@RequestParam(required = false, defaultValue = "Example: yyyy-MM-ddThh:mm") String endDate, 
-			@RequestParam(required = false) Integer numberAttendees){
+			@RequestParam(required = false, defaultValue = "1900-01-01T00:00") String startDate, 
+			@RequestParam(required = false, defaultValue = "2100-12-31T23:59") String endDate, 
+			@RequestParam(required = false) Integer numberAttendees) throws IOException{
 		
 		return meetingService.filterMeeting(description, 
 				responsiblePerson, 

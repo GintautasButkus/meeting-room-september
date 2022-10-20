@@ -1,9 +1,6 @@
 package lt.butkus.model;
 
 import java.util.List;
-
-import javax.persistence.Id;
-
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,7 +12,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Meeting {
-	@Id
+//	@Id
 	@ApiModelProperty(hidden = true)
 	private String id;
 	private String name;

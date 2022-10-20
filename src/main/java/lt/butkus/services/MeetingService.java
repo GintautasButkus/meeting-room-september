@@ -1,6 +1,7 @@
 package lt.butkus.services;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -48,8 +49,8 @@ public class MeetingService {
 	Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
 	public void saveMeeting(Meeting meeting) throws IOException {
-		File f = new File(filePath + fileName);
-		if(!f.exists()){
+		Path path = Paths.get(filePath + fileName);
+		if(Files.notExists(path)){
 			PrintWriter pw = new PrintWriter(new FileWriter(filePath + fileName));
 			pw.close();
 		}else{
@@ -71,15 +72,15 @@ public class MeetingService {
 		fw.close();
 	}
 
-	public Meeting[] getMeetings() {
+	public Meeting[] getMeetings() throws IOException {
 		Gson gson1 = new Gson();
 		try (Reader reader = new FileReader(filePath + fileName)) {
-			return gson1.fromJson(reader, Meeting[].class);
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return new Meeting[0];
+			return gson1.fromJson(reader, Meeting[].class);}
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//		return new Meeting[0];
+//		return new Meeting[0];
 	}
 
 	public void deleteMeeting(String id) throws IOException {
@@ -143,7 +144,7 @@ public class MeetingService {
 		saveNewFile(meetingsList);
 	}
 	
-	public List<Meeting> filterMeeting(String description, String responsiblePerson, EnumCategory category, EnumType type, String startDate, String endDate, Integer numberAttendees){
+	public List<Meeting> filterMeeting(String description, String responsiblePerson, EnumCategory category, EnumType type, String startDate, String endDate, Integer numberAttendees) throws IOException{
 		Stream<Meeting> stream = Arrays.stream(getMeetings());
 		
 		return stream
@@ -166,6 +167,10 @@ public class MeetingService {
 		for (Meeting meeting : newList) {
 			saveMeeting(meeting);
 		}
-		
+	}
+	
+	public void deleteMeetings() throws IOException {
+		Path path = Paths.get(filePath + fileName);
+		Files.delete(path);
 	}
 }

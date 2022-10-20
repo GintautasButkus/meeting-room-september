@@ -3,11 +3,10 @@ package lt.butkus;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
 class MeetingRoomSeptemberApplicationTests {
 
 	@Test
-	void contextLoads() {
+	void itShouldAddNumbers() {
 	}
 
 }
